@@ -42,20 +42,12 @@ CLASS business.ItemEntity INHERITS BusinessEntity USE-WIDGET-POOL:
     METHOD PUBLIC LOGICAL ValidateItem(INPUT-OUTPUT DATASET dsItem,
                                        OUTPUT errorMessage AS CHARACTER):
         VAR LOGICAL isValid = TRUE.
-        VAR DECIMAL dTotal.
 
         FIND FIRST ttItem NO-ERROR.
         IF AVAILABLE ttItem THEN DO:
             IF ttItem.Price = 0 THEN DO:
                 isValid = FALSE.
                 errorMessage = "Price cannot be empty".
-                RETURN isValid.
-            END.
-
-            dTotal = ttItem.OnHand * ttItem.Price.
-            IF dTotal > 6000 THEN DO:
-                isValid = FALSE.
-                errorMessage = "Total value onhand will be " + STRING(dTotal) + ", should not be larger than 6000".
                 RETURN isValid.
             END.
         END.
