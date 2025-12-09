@@ -1,12 +1,12 @@
 &ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI
 &ANALYZE-RESUME
 &Scoped-define WINDOW-NAME C-Win
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win
 /*------------------------------------------------------------------------
 
-  File: 
+  File:
 
-  Description: 
+  Description:
 
   Input Parameters:
       <none>
@@ -14,17 +14,20 @@
   Output Parameters:
       <none>
 
-  Author: 
+  Author:
 
-  Created: 
+  Created:
 
 ------------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.      */
 /*----------------------------------------------------------------------*/
 
-/* Create an unnamed pool to store all the widgets created 
+USING business.ItemEntity FROM PROPATH.
+USING business.EntityFactory FROM PROPATH.
+
+/* Create an unnamed pool to store all the widgets created
      by this procedure. This is a good default which assures
-     that this procedure's triggers and internal procedures 
+     that this procedure's triggers and internal procedures
      will execute in this procedure's storage, and that proper
      cleanup will occur on deletion of the procedure. */
 
@@ -35,8 +38,6 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-USING business.ItemEntity FROM PROPATH.
-USING business.EntityFactory FROM PROPATH.
 
 {business/ItemDataset.i}
 
@@ -47,7 +48,7 @@ DEFINE VARIABLE objItemEntity AS ItemEntity NO-UNDO.
 &ANALYZE-RESUME
 
 
-&ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
+&ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -59,8 +60,8 @@ DEFINE VARIABLE objItemEntity AS ItemEntity NO-UNDO.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS FILL-IN_ItemNum FILL-IN_Price BUTTON-4 ~
-BUTTON-3 
-&Scoped-Define DISPLAYED-OBJECTS FILL-IN_ItemNum FILL-IN_Price 
+BUTTON-3
+&Scoped-Define DISPLAYED-OBJECTS FILL-IN_ItemNum FILL-IN_Price
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -76,22 +77,22 @@ BUTTON-3
 DEFINE VARIABLE C-Win AS WIDGET-HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
-DEFINE BUTTON BUTTON-3 
-     LABEL "Get Item" 
+DEFINE BUTTON BUTTON-3
+     LABEL "Get Item"
      SIZE 15 BY 1.14.
 
-DEFINE BUTTON BUTTON-4 
-     LABEL "Save" 
+DEFINE BUTTON BUTTON-4
+     LABEL "Save"
      SIZE 15 BY 1.14.
 
-DEFINE VARIABLE FILL-IN_ItemNum AS INTEGER FORMAT "zzzzzzzzz9" INITIAL 0 
-     LABEL "Item Num" 
-     VIEW-AS FILL-IN 
+DEFINE VARIABLE FILL-IN_ItemNum AS INTEGER FORMAT "zzzzzzzzz9" INITIAL 0
+     LABEL "Item Num"
+     VIEW-AS FILL-IN
      SIZE 14 BY 1 NO-UNDO.
 
-DEFINE VARIABLE FILL-IN_Price AS DECIMAL FORMAT "->,>>>,>>9.99" INITIAL 0 
-     LABEL "Price" 
-     VIEW-AS FILL-IN 
+DEFINE VARIABLE FILL-IN_Price AS DECIMAL FORMAT "->,>>>,>>9.99" INITIAL 0
+     LABEL "Price"
+     VIEW-AS FILL-IN
      SIZE 14 BY 1 NO-UNDO.
 
 
@@ -104,8 +105,8 @@ DEFINE FRAME DEFAULT-FRAME
           "Please enter a Price." WIDGET-ID 8
      BUTTON-4 AT ROW 3.86 COL 39 WIDGET-ID 10
      BUTTON-3 AT ROW 4.1 COL 16 WIDGET-ID 6
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY
+         SIDE-LABELS NO-UNDERLINE THREE-D
          AT COLUMN 1 ROW 1
          SIZE 80 BY 16 WIDGET-ID 100.
 
@@ -170,7 +171,7 @@ THEN C-Win:HIDDEN = no.
 */  /* FRAME DEFAULT-FRAME */
 &ANALYZE-RESUME
 
- 
+
 
 
 /* ************************  Control Triggers  ************************ */
@@ -205,12 +206,13 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-3 C-Win
 ON CHOOSE OF BUTTON-3 IN FRAME DEFAULT-FRAME /* Get Item */
 DO:
-  ASSIGN FILL-IN_ItemNum. 
-  
+  VAR LOGICAL lFound.
+
+  ASSIGN FILL-IN_ItemNum.
+
   objFactory = EntityFactory:GetInstance().
   objItemEntity = objFactory:GetItemEntity().
-  
-  VAR LOGICAL lFound.
+
   lFound = objItemEntity:GetItemByNum(INTEGER(FILL-IN_ItemNum), OUTPUT DATASET dsItem).
 
   IF lFound THEN
@@ -234,13 +236,13 @@ ON CHOOSE OF BUTTON-4 IN FRAME DEFAULT-FRAME /* Save */
 DO:
   VAR CHARACTER cErrorMessage.
   VAR LOGICAL isValid.
+  VAR LOGICAL lFound.
 
   ASSIGN FILL-IN_Price.
-  
+
   objFactory = EntityFactory:GetInstance().
   objItemEntity = objFactory:GetItemEntity().
-  
-  VAR LOGICAL lFound.
+
   lFound = objItemEntity:GetItemByNum(INTEGER(FILL-IN_ItemNum), OUTPUT DATASET dsItem).
 
   IF lFound THEN
@@ -248,13 +250,13 @@ DO:
      TEMP-TABLE ttItem:TRACKING-CHANGES = TRUE.
      FIND FIRST ttItem.
      ttItem.Price = FILL-IN_Price.
-     
+
      isValid = objItemEntity:ValidateItem(INPUT-OUTPUT DATASET dsItem BY-REFERENCE, OUTPUT cErrorMessage).
-     
+
      IF isValid THEN
          objItemEntity:UpdateItem(INPUT-OUTPUT DATASET dsItem BY-REFERENCE).
      ELSE
-         MESSAGE cErrorMessage VIEW-AS ALERT-BOX.   
+         MESSAGE cErrorMessage VIEW-AS ALERT-BOX.
   END.
   ELSE
      MESSAGE 'Item not found' VIEW-AS ALERT-BOX.
@@ -267,18 +269,18 @@ END.
 
 &UNDEFINE SELF-NAME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK C-Win 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK C-Win
 
 
 /* ***************************  Main Block  *************************** */
 
 /* Set CURRENT-WINDOW: this will parent dialog-boxes and frames.        */
-ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME} 
+ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME}
        THIS-PROCEDURE:CURRENT-WINDOW = {&WINDOW-NAME}.
 
 /* The CLOSE event can be used from inside or outside the procedure to  */
 /* terminate it.                                                        */
-ON CLOSE OF THIS-PROCEDURE 
+ON CLOSE OF THIS-PROCEDURE
    RUN disable_UI.
 
 /* Best default for GUI applications is...                              */
@@ -306,7 +308,7 @@ PROCEDURE disable_UI :
   Purpose:     DISABLE the User Interface
   Parameters:  <none>
   Notes:       Here we clean-up the user-interface by deleting
-               dynamic widgets we have created and/or hide 
+               dynamic widgets we have created and/or hide
                frames.  This procedure is usually called when
                we are ready to "clean-up" after running.
 ------------------------------------------------------------------------------*/
@@ -327,14 +329,13 @@ PROCEDURE enable_UI :
   Notes:       Here we display/view/enable the widgets in the
                user-interface.  In addition, OPEN all queries
                associated with each FRAME and BROWSE.
-               These statements here are based on the "Other 
+               These statements here are based on the "Other
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
 
-  GET FIRST DEFAULT-FRAME.
-  DISPLAY FILL-IN_ItemNum FILL-IN_Price 
+  DISPLAY FILL-IN_ItemNum FILL-IN_Price
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE FILL-IN_ItemNum FILL-IN_Price BUTTON-4 BUTTON-3 
+  ENABLE FILL-IN_ItemNum FILL-IN_Price BUTTON-4 BUTTON-3
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   VIEW C-Win.
 END PROCEDURE.
